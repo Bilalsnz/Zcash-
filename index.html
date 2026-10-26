@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1B8A3E">
+  <meta name="description" content="Explore narrowly scoped Zcash payment evidence. Verification is currently under development.">
+  <title>Build Receipts | Zcash Testnet</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Build Receipts home">
+        <span class="brand-mark" aria-hidden="true">BR</span>
+        <span>Build Receipts</span>
+      </a>
+      <span class="network-badge" id="network-badge">TESTNET</span>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">PRIVATE PAYMENT EVIDENCE</p>
+      <h1>Prove one payment.<br><span>Share less.</span></h1>
+      <p class="hero-copy">Explore a way to share evidence for one Zcash payment without handing over your broader wallet history.</p>
+      <div class="notice" role="status">
+        <strong>Early development</strong>
+        <span>Cryptographic verification is not enabled yet. No receipt will be marked verified by this scaffold.</span>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="verify-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">PAYMENT CHECK</p>
+          <h2 id="verify-title">Check a receipt</h2>
+        </div>
+        <span class="step-tag">01 / INPUT</span>
+      </div>
+      <label for="receipt">Receipt JSON</label>
+      <textarea id="receipt" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='Paste a receipt JSON object here'></textarea>
+      <p class="helper">Only use testnet data during development. Never paste seed phrases, spending keys, or private credentials.</p>
+      <button id="check" type="button">Check receipt</button>
+      <button id="load-example" class="button-secondary" type="button">Load example format</button>
+    </section>
+
+    <section id="result" class="card result-card result-not-verifiable" aria-live="polite" aria-labelledby="result-title">
+      <div class="result-topline">
+        <span class="eyebrow">VERIFICATION RESULT</span>
+        <span class="network-badge">TESTNET</span>
+      </div>
+      <h2 id="result-title">Not verifiable yet</h2>
+      <p id="result-summary">The cryptographic verifier has not passed its technical gate.</p>
+      <dl class="result-details">
+        <div><dt>Transaction status</dt><dd id="tx-status">Unknown</dd></div>
+        <div><dt>Verified claims</dt><dd id="verified-claims">None</dd></div>
+        <div><dt>Disclosed to verifier</dt><dd id="disclosure-scope">Nothing verified</dd></div>
+      </dl>
+      <p id="result-reason" class="result-reason">Verification is intentionally disabled until the disclosure mechanism is confirmed.</p>
+    </section>
+
+    <footer>
+      <p>Experimental software. This interface is not proof of payment or a guarantee of privacy.</p>
+      <a href="https://github.com/Bilalsnz/Zcash-">Open source repository</a>
+    </footer>
+  </main>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
