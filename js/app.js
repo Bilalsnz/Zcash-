@@ -24,10 +24,24 @@ function normalizeUrl(raw) {
 function rpcCandidates(data) {
   const root = data?.result && typeof data.result === "object" ? data.result : data;
   const chain = root?.chain ?? root?.chain_name ?? root?.network ?? root?.chainName;
-  const height = root?.blocks ?? root?.height ?? root?.best_height ?? root?.bestHeight;
-  const headers = root?.headers ?? root?.header_height;
+  const heightValue = root?.blocks ?? root?.height ?? root?.best_height ?? root?.bestHeight;
   const version = root?.subversion ?? root?.version ?? root?.build ?? root?.server_version;
-  return { root, chain, height: Number.isFinite(Number(height)) ? Number(height) : null, headers: Number.isFinite(Number(headers)) ? Number(headers) : null, version };
+  const upgrades = root?.upgrades && typeof root.upgrades === "object" ? root.upgrades : {};
+  const nu7 = Object.entries(upgrades).find(([id, value]) =>
+    id.toLowerCase().replace(/^0x/, "") === BRANCH_ID.toLowerCase().replace(/^0x/, "") ||
+    String(value?.name ?? "").toLowerCase().includes("nu7")
+  )?.[1] ?? null;
+  const consensus = root?.consensus ?? null;
+  const nextBranch = consensus?.nextblock ?? consensus?.nextBlock ?? null;
+  const tipBranch = consensus?.chaintip ?? consensus?.chainTip ?? null;
+  return {
+    chain,
+    height: heightValue !== undefined && heightValue !== null && Number.isFinite(Number(heightValue)) ? Number(heightValue) : null,
+    version,
+    nu7,
+    nextBranch: nextBranch == null ? null : String(nextBranch).toLowerCase(),
+    tipBranch: tipBranch == null ? null : String(tipBranch).toLowerCase()
+  };
 }
 async function probe() {
   showError("");
@@ -42,7 +56,7 @@ async function probe() {
   setText("network-value", "Unknown");
   setText("height-value", "Unknown");
   setText("activation-value", "Testnet height 4,465,026");
-  setText("version-value", "Unknown");
+  setText("version-value", "Not reported by this method");
   setText("ready-value", "Not assessed");
   setText("result-reason", "Waiting for a valid JSON-RPC response.");
   const controller = new AbortController();
@@ -65,6 +79,10 @@ async function probe() {
     const chainText = info.chain == null ? "Not reported" : String(info.chain);
     const testnet = /test|testnet/i.test(chainText);
     const height = info.height;
+    const branch = BRANCH_ID.toLowerCase();
+    const nextMatches = info.nextBranch === branch || info.nextBranch === branch.replace(/^0x/, "");
+    const tipMatches = info.tipBranch === branch || info.tipBranch === branch.replace(/^0x/, "");
+    const reportedActive = String(info.nu7?.status ?? "").toLowerCase() === "active";
     setText("rpc-status", "Responded");
     setText("network-value", chainText);
     setText("height-value", height == null ? "Not reported" : height.toLocaleString("en-US"));
@@ -81,19 +99,26 @@ async function probe() {
       setText("result-summary", "The endpoint appears to report Testnet, but no recognizable block height was found.");
       setText("ready-value", "Unable to assess");
       setText("result-reason", "The endpoint's response schema may differ from the supported fields. No readiness conclusion is made.");
-    } else if (height >= ACTIVATION_HEIGHT) {
-      setBadge("PARTIAL SIGNAL", "warn");
-      setText("result-title", "NU7 activation height reached");
-      setText("result-summary", "The endpoint reports Testnet at or above the NU7 activation height.");
-      setText("activation-value", "Reached at reported height");
-      setText("ready-value", "Height signal only");
-      setText("result-reason", "This confirms only the reported chain and height. It does not prove the server runs NU7-compatible software, uses branch ID " + BRANCH_ID + ", or accepts a specific NU7 transaction.");
-    } else {
+    } else if (height < ACTIVATION_HEIGHT) {
       setBadge("BEFORE ACTIVATION", "warn");
       setText("result-title", "Reported height is pre-NU7");
       setText("result-summary", "The endpoint reports a Testnet height below the NU7 activation point.");
       setText("ready-value", "Not ready by height");
       setText("result-reason", "Reported height is below " + ACTIVATION_HEIGHT.toLocaleString("en-US") + ". This may be a stale or lagging endpoint. The result does not independently validate consensus.");
+    } else if (reportedActive && nextMatches) {
+      setBadge("NU7 SIGNALS MATCH", "good");
+      setText("result-title", "NU7 reported active for next block");
+      setText("result-summary", "The endpoint reports Testnet beyond activation, marks NU7 active, and reports the expected branch ID for the next block.");
+      setText("activation-value", "Active, according to RPC");
+      setText("ready-value", "Strong RPC signals, not certified");
+      setText("result-reason", "Reported NU7 status and next-block branch ID match ZIP 259 (" + BRANCH_ID + "). This is stronger evidence than height alone, but it does not test mempool acceptance or guarantee a specific transaction will be accepted.");
+    } else {
+      setBadge("PARTIAL SIGNAL", "warn");
+      setText("result-title", "NU7 height reached, readiness incomplete");
+      setText("result-summary", "The endpoint reports Testnet at or above the NU7 activation height, but the RPC response did not confirm every expected NU7 signal.");
+      setText("activation-value", reportedActive ? "Active status reported" : "Height reached; status not confirmed");
+      setText("ready-value", "Height signal only");
+      setText("result-reason", "Expected branch ID: " + BRANCH_ID + ". NU7 status: " + (info.nu7?.status ?? "not reported") + ". Next-block branch: " + (info.nextBranch ?? "not reported") + ". Chain-tip branch: " + (info.tipBranch ?? "not reported") + ". This tool does not broadcast a transaction or certify mempool acceptance.");
     }
   } catch (error) {
     const message = error.name === "AbortError"
