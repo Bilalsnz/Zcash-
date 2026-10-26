@@ -1,67 +1,46 @@
-# Build Receipts
+# NU7 Check
 
-**Status: early scaffold. Verification is not implemented.**
+A small, mobile-first diagnostic UI for investigating Zcash Testnet node endpoints and NU7 activation signals.
 
-Build Receipts explores a way to share evidence for one Zcash payment without sharing a user's broader wallet history.
+## What it does
 
-## Network policy
+- Accepts a full HTTP(S) JSON-RPC endpoint URL.
+- Sends a read-only `getblockchaininfo` request from the browser.
+- Displays the response status, recognizable network name, reported height, and software version when present.
+- Compares a reported Testnet height with the official NU7 activation height.
+- Fails closed when the network or height cannot be determined.
 
-Development and the verification gate are **testnet-only**. The app displays its configured network on every result. Do not send mainnet funds for this scaffold.
+## Consensus constants
 
-## Current status
+From [ZIP 259: Deployment of the NU7 Network Upgrade](https://zips.z.cash/zip-0259):
 
-- [x] Mobile-first single-page shell
-- [x] Receipt JSON parsing with basic input validation
-- [x] Explicit result states: Verified, Invalid, Not verifiable
-- [x] Network badge on every result
-- [x] Chain and verifier modules intentionally fail closed
-- [ ] Confirm the supported Zcash payment-disclosure mechanism
-- [ ] Confirm what a disclosure cryptographically proves
-- [ ] Implement testnet chain-data retrieval
-- [ ] Implement independent disclosure verification
-- [ ] Demonstrate a real testnet disclosure accepted by the verifier
-- [ ] Demonstrate rejection of altered cryptographically bound data
+- Testnet NU7 activation height: `4,465,026`
+- NU7 consensus branch ID: `0x77190AD9`
 
-## What is proven
+NU7 activated on public Testnet at that height. The tool uses this as a reference point, not as proof of transaction acceptance.
 
-Nothing yet. This repository is an initial scaffold, not a working payment verifier. Parsing a receipt or finding a transaction does not by itself prove that a particular shielded recipient received a particular amount.
+## Important limitations
 
-Before implementing verification, document:
-1. The disclosure format and its generation method.
-2. The claims it actually proves.
-3. The data and any key material required by a verifier.
-4. The verification method and its cryptographic binding.
-5. The privacy limitations and trust assumptions.
+**This is not a full NU7 transaction readiness certification.** A reported Testnet height at or above activation is only one signal. The tool does not submit a transaction, test mempool admission, independently validate the node's consensus chain, or prove that every NU7 transaction will be accepted. It cannot infer a server's exact software version if the RPC response does not include it.
 
-Research starting points:
-- [Zcash developer documentation](https://zcash.readthedocs.io/)
-- [librustzcash](https://github.com/zcash/librustzcash)
-- [ZODL repositories](https://github.com/zcash)
-- [lightwalletd](https://github.com/zcash/lightwalletd)
+The browser request requires an HTTP(S) JSON-RPC endpoint that allows cross-origin browser requests (CORS). Many node RPCs are intentionally private or require authentication. Do not expose a node's RPC publicly just to use this page, and do not enter credentials, seed phrases, or private keys. Hosh's listed lightwalletd endpoints generally use gRPC, which is not the same protocol as browser-accessible JSON-RPC. A failed probe may mean CORS, authentication, TLS, endpoint protocol, or connectivity problems, not necessarily that the node is offline.
 
-## Result states
-
-- **Verified:** at least one explicitly listed claim passed the implemented verification.
-- **Invalid:** evidence was actually checked and failed a required integrity or cryptographic check.
-- **Not verifiable:** malformed input, unavailable chain data, unsupported disclosure, or missing verification requirements.
-- **Pending confirmation:** a transaction has been detected but has not reached the configured confirmation threshold.
-
-These states must not be collapsed into a single success/failure indicator.
-
-## Privacy and security
-
-- Never request or store a wallet seed phrase or private spending key.
-- Do not ask users to paste viewing keys until the disclosure design and security implications have been reviewed.
-- Treat receipts as untrusted input. Render user-supplied values as text, not HTML.
-- Do not claim that a transaction ID alone proves a specific shielded payment.
-- Do not label a payment verified until the real verifier and its tests pass.
-
-## Difference from privacy observatories
-
-The intended focus is voluntary, narrowly scoped payment evidence shared by a payer with a recipient. It is not a tool for broadly investigating transaction relationships or certifying complete privacy. This positioning must be revisited against the final implementation and competing projects.
+Only use Testnet endpoints. No transaction is broadcast. No server credentials are collected or stored by this page.
 
 ## Run locally
 
-This is a static ES-module app. Serve the repository with any local static HTTP server; opening `index.html` directly may block module imports in some browsers.
+Serve the repository as static files, or deploy it to a static host. Open `index.html` through HTTP(S), enter a compatible Testnet JSON-RPC URL, and run the check. Opening the file directly may have browser restrictions.
 
-**Verification is deliberately disabled until the protocol gate is passed.** The current UI should show “Not verifiable” rather than simulate success.
+## Current status
+
+This is an experimental prototype. It has not yet been demonstrated against a confirmed public, browser-accessible Testnet JSON-RPC endpoint. Do not present the result as a completed end-to-end transaction readiness test until that validation has been performed.
+
+## References
+
+- [ZIP 259](https://zips.z.cash/zip-0259)
+- [Zebra releases](https://github.com/ZcashFoundation/zebra/releases)
+- [Hosh Zcash Light Wallet Uptime](https://hosh.zec.rocks/zec)
+
+## License
+
+No license has been added yet.
