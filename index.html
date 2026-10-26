@@ -4,72 +4,56 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10151c">
-  <meta name="description" content="A testnet-only diagnostic for checking a Zcash NU7 node endpoint.">
+  <meta name="description" content="Paste a Zcash Testnet getblockchaininfo response to inspect NU7 activation-height signals.">
   <title>NU7 Check | Zcash Testnet</title>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="NU7 Check home">
-        <span class="brand-mark" aria-hidden="true">N7</span>
-        <span>NU7 Check</span>
-      </a>
+      <a class="brand" href="./" aria-label="NU7 Check home"><span class="brand-mark" aria-hidden="true">N7</span><span>NU7 Check</span></a>
       <span class="network-badge">TESTNET ONLY</span>
     </header>
     <section class="hero">
       <p class="eyebrow">ZCASH NODE DIAGNOSTICS</p>
       <h1>Is this node<br><span>ready for NU7?</span></h1>
-      <p class="hero-copy">Probe a Zcash Testnet JSON-RPC endpoint, inspect its reported chain height, and compare it with the official NU7 activation point.</p>
-      <div class="notice" role="note">
-        <strong>Important distinction</strong>
-        <span>This tool can inspect reported node information. It cannot guarantee transaction acceptance without submitting and confirming a real NU7 transaction.</span>
-      </div>
+      <p class="hero-copy">Paste a <code>getblockchaininfo</code> response to check NU7 readiness. The page analyzes the JSON you provide locally, without contacting a server.</p>
+      <div class="notice" role="note"><strong>Important distinction</strong><span>This is a diagnostic signal, not a transaction-readiness certification. A reported height alone cannot prove consensus compatibility or transaction acceptance.</span></div>
     </section>
-    <section class="card" aria-labelledby="probe-title">
-      <div class="section-heading">
-        <div><p class="eyebrow">01 / ENDPOINT</p><h2 id="probe-title">Probe a node</h2></div>
-        <span class="step-tag">LIVE REQUEST</span>
-      </div>
-      <label for="endpoint">Testnet JSON-RPC URL</label>
-      <input id="endpoint" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://your-testnet-rpc.example" aria-describedby="endpoint-help">
-      <p id="endpoint-help" class="helper">Enter a full HTTP(S) JSON-RPC URL, not just a hostname or a lightwalletd gRPC address. The server must allow browser CORS requests. Never enter passwords, seed phrases, or private keys.</p>
-      <div class="button-row">
-        <button id="probe" type="button">Run endpoint check</button>
-        <button id="sample" class="button-secondary" type="button">Use example format</button>
-      </div>
-      <p id="form-error" class="form-error" role="alert" hidden></p>
+    <section class="card" aria-labelledby="paste-title">
+      <div class="section-heading"><div><p class="eyebrow">01 / PASTE RESPONSE</p><h2 id="paste-title">Inspect node output</h2></div><span class="step-tag">LOCAL ANALYSIS</span></div>
+      <label for="response-json">JSON response from <code>getblockchaininfo</code></label>
+      <textarea id="response-json" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='Paste the JSON response here, for example: {"chain":"test","blocks":4465026}' aria-describedby="paste-help"></textarea>
+      <p id="paste-help" class="helper">Paste the JSON response body, not a node URL. Remove any private information before pasting. This page does not send the pasted text anywhere.</p>
+      <div class="button-row"><button id="check" type="button">Check pasted response</button><button id="load-fixture" class="button-secondary" type="button">Load example fixture</button></div>
+      <p id="fixture-note" class="helper" hidden>Test fixture is hand-built from ZIP 259 constants, not captured from a live node.</p>
     </section>
-    <section id="result" class="card result-card" aria-live="polite" aria-labelledby="result-title">
+    <section class="card result-card" aria-live="polite" aria-labelledby="result-title">
       <div class="result-topline"><span class="eyebrow">DIAGNOSTIC REPORT</span><span id="result-badge" class="status-badge status-neutral">NOT RUN</span></div>
-      <h2 id="result-title">Waiting for endpoint</h2>
-      <p id="result-summary">Run a probe to see whether the endpoint responds with recognizable Testnet node information.</p>
+      <h2 id="result-title">Waiting for pasted response</h2>
+      <p id="result-summary">Paste a getblockchaininfo response and run the checker.</p>
       <dl class="result-details">
-        <div><dt>RPC response</dt><dd id="rpc-status">Not checked</dd></div>
+        <div><dt>Input status</dt><dd id="rpc-status">Not checked</dd></div>
         <div><dt>Reported network</dt><dd id="network-value">Unknown</dd></div>
         <div><dt>Reported block height</dt><dd id="height-value">Unknown</dd></div>
         <div><dt>NU7 activation</dt><dd id="activation-value">Testnet height 4,465,026</dd></div>
         <div><dt>Node software</dt><dd id="version-value">Unknown</dd></div>
         <div><dt>Readiness signal</dt><dd id="ready-value">Not assessed</dd></div>
       </dl>
-      <p id="result-reason" class="result-reason">No request has been made. This page does not send transactions or collect credentials.</p>
+      <p id="result-reason" class="result-reason">No response has been analyzed. No network request is made, and no transaction is broadcast.</p>
     </section>
     <section class="card notes">
-      <p class="eyebrow">WHAT THIS CAN AND CANNOT SAY</p>
-      <h2>Evidence, not a guarantee.</h2>
+      <p class="eyebrow">WHAT THIS CAN AND CANNOT SAY</p><h2>Evidence, not a guarantee.</h2>
       <ul>
         <li>NU7 Testnet activation height: <strong>4,465,026</strong>.</li>
         <li>NU7 consensus branch ID: <code>0x77190AD9</code>.</li>
-        <li>A reported height at or above activation does not prove the node's software or mempool accepts every NU7 transaction.</li>
-        <li>Browser CORS, authentication, and endpoint protocol can prevent a probe even when a node is running.</li>
-        <li>Use Testnet endpoints only. This tool does not broadcast transactions.</li>
+        <li>Live endpoint checks: <strong>not yet verified</strong>.</li>
+        <li>Test fixtures are hand-built from ZIP 259 constants, not captured from a live node.</li>
+        <li>A height at or above activation does not prove software readiness, consensus agreement, mempool acceptance, or acceptance of a particular transaction.</li>
       </ul>
       <p class="source-links">Sources: <a href="https://zips.z.cash/zip-0259" target="_blank" rel="noreferrer">ZIP 259</a> · <a href="https://github.com/ZcashFoundation/zebra/releases" target="_blank" rel="noreferrer">Zebra releases</a></p>
     </section>
-    <footer>
-      <p>Experimental open-source tooling. A failed browser probe is not proof that a server is offline.</p>
-      <a href="https://github.com/Bilalsnz/Zcash-">Source repository</a>
-    </footer>
+    <footer><p>Experimental open-source tooling. Results depend on the accuracy and freshness of the pasted response.</p><a href="https://github.com/Bilalsnz/Zcash-">Source repository</a></footer>
   </main>
   <script type="module" src="./js/app.js"></script>
 </body>
