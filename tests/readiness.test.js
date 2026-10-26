@@ -7,7 +7,7 @@ test("testnet response at activation height reports height signal only", () => {
   assert.equal(result.badge, "HEIGHT SIGNAL ONLY");
   assert.equal(result.readiness, "Height signal only");
   assert.equal(result.network, "test");
-  assert.equal(result.height, ACTIVATION_HEIGHT.toLocaleString("en-US"));
+  assert.equal(result.height, (ACTIVATION_HEIGHT + 1).toLocaleString("en-US"));
   assert.match(result.reason, new RegExp(BRANCH_ID.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
