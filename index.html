@@ -3,64 +3,72 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#1B8A3E">
-  <meta name="description" content="Explore narrowly scoped Zcash payment evidence. Verification is currently under development.">
-  <title>Build Receipts | Zcash Testnet</title>
+  <meta name="theme-color" content="#10151c">
+  <meta name="description" content="A testnet-only diagnostic for checking a Zcash NU7 node endpoint.">
+  <title>NU7 Check | Zcash Testnet</title>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
-      <a class="brand" href="./" aria-label="Build Receipts home">
-        <span class="brand-mark" aria-hidden="true">BR</span>
-        <span>Build Receipts</span>
+      <a class="brand" href="./" aria-label="NU7 Check home">
+        <span class="brand-mark" aria-hidden="true">N7</span>
+        <span>NU7 Check</span>
       </a>
-      <span class="network-badge" id="network-badge">TESTNET</span>
+      <span class="network-badge">TESTNET ONLY</span>
     </header>
-
     <section class="hero">
-      <p class="eyebrow">PRIVATE PAYMENT EVIDENCE</p>
-      <h1>Prove one payment.<br><span>Share less.</span></h1>
-      <p class="hero-copy">Explore a way to share evidence for one Zcash payment without handing over your broader wallet history.</p>
-      <div class="notice" role="status">
-        <strong>Early development</strong>
-        <span>Cryptographic verification is not enabled yet. No receipt will be marked verified by this scaffold.</span>
+      <p class="eyebrow">ZCASH NODE DIAGNOSTICS</p>
+      <h1>Is this node<br><span>ready for NU7?</span></h1>
+      <p class="hero-copy">Probe a Zcash Testnet JSON-RPC endpoint, inspect its reported chain height, and compare it with the official NU7 activation point.</p>
+      <div class="notice" role="note">
+        <strong>Important distinction</strong>
+        <span>This tool can inspect reported node information. It cannot guarantee transaction acceptance without submitting and confirming a real NU7 transaction.</span>
       </div>
     </section>
-
-    <section class="card" aria-labelledby="verify-title">
+    <section class="card" aria-labelledby="probe-title">
       <div class="section-heading">
-        <div>
-          <p class="eyebrow">PAYMENT CHECK</p>
-          <h2 id="verify-title">Check a receipt</h2>
-        </div>
-        <span class="step-tag">01 / INPUT</span>
+        <div><p class="eyebrow">01 / ENDPOINT</p><h2 id="probe-title">Probe a node</h2></div>
+        <span class="step-tag">LIVE REQUEST</span>
       </div>
-      <label for="receipt">Receipt JSON</label>
-      <textarea id="receipt" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='Paste a receipt JSON object here'></textarea>
-      <p class="helper">Only use testnet data during development. Never paste seed phrases, spending keys, or private credentials.</p>
-      <button id="check" type="button">Check receipt</button>
-      <button id="load-example" class="button-secondary" type="button">Load example format</button>
+      <label for="endpoint">Testnet JSON-RPC URL</label>
+      <input id="endpoint" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://your-testnet-rpc.example" aria-describedby="endpoint-help">
+      <p id="endpoint-help" class="helper">Enter a full HTTP(S) JSON-RPC URL, not just a hostname or a lightwalletd gRPC address. The server must allow browser CORS requests. Never enter passwords, seed phrases, or private keys.</p>
+      <div class="button-row">
+        <button id="probe" type="button">Run endpoint check</button>
+        <button id="sample" class="button-secondary" type="button">Use example format</button>
+      </div>
+      <p id="form-error" class="form-error" role="alert" hidden></p>
     </section>
-
-    <section id="result" class="card result-card result-not-verifiable" aria-live="polite" aria-labelledby="result-title">
-      <div class="result-topline">
-        <span class="eyebrow">VERIFICATION RESULT</span>
-        <span class="network-badge">TESTNET</span>
-      </div>
-      <h2 id="result-title">Not verifiable yet</h2>
-      <p id="result-summary">The cryptographic verifier has not passed its technical gate.</p>
+    <section id="result" class="card result-card" aria-live="polite" aria-labelledby="result-title">
+      <div class="result-topline"><span class="eyebrow">DIAGNOSTIC REPORT</span><span id="result-badge" class="status-badge status-neutral">NOT RUN</span></div>
+      <h2 id="result-title">Waiting for endpoint</h2>
+      <p id="result-summary">Run a probe to see whether the endpoint responds with recognizable Testnet node information.</p>
       <dl class="result-details">
-        <div><dt>Transaction status</dt><dd id="tx-status">Unknown</dd></div>
-        <div><dt>Verified claims</dt><dd id="verified-claims">None</dd></div>
-        <div><dt>Disclosed to verifier</dt><dd id="disclosure-scope">Nothing verified</dd></div>
+        <div><dt>RPC response</dt><dd id="rpc-status">Not checked</dd></div>
+        <div><dt>Reported network</dt><dd id="network-value">Unknown</dd></div>
+        <div><dt>Reported block height</dt><dd id="height-value">Unknown</dd></div>
+        <div><dt>NU7 activation</dt><dd id="activation-value">Testnet height 4,465,026</dd></div>
+        <div><dt>Node software</dt><dd id="version-value">Unknown</dd></div>
+        <div><dt>Readiness signal</dt><dd id="ready-value">Not assessed</dd></div>
       </dl>
-      <p id="result-reason" class="result-reason">Verification is intentionally disabled until the disclosure mechanism is confirmed.</p>
+      <p id="result-reason" class="result-reason">No request has been made. This page does not send transactions or collect credentials.</p>
     </section>
-
+    <section class="card notes">
+      <p class="eyebrow">WHAT THIS CAN AND CANNOT SAY</p>
+      <h2>Evidence, not a guarantee.</h2>
+      <ul>
+        <li>NU7 Testnet activation height: <strong>4,465,026</strong>.</li>
+        <li>NU7 consensus branch ID: <code>0x77190AD9</code>.</li>
+        <li>A reported height at or above activation does not prove the node's software or mempool accepts every NU7 transaction.</li>
+        <li>Browser CORS, authentication, and endpoint protocol can prevent a probe even when a node is running.</li>
+        <li>Use Testnet endpoints only. This tool does not broadcast transactions.</li>
+      </ul>
+      <p class="source-links">Sources: <a href="https://zips.z.cash/zip-0259" target="_blank" rel="noreferrer">ZIP 259</a> · <a href="https://github.com/ZcashFoundation/zebra/releases" target="_blank" rel="noreferrer">Zebra releases</a></p>
+    </section>
     <footer>
-      <p>Experimental software. This interface is not proof of payment or a guarantee of privacy.</p>
-      <a href="https://github.com/Bilalsnz/Zcash-">Open source repository</a>
+      <p>Experimental open-source tooling. A failed browser probe is not proof that a server is offline.</p>
+      <a href="https://github.com/Bilalsnz/Zcash-">Source repository</a>
     </footer>
   </main>
   <script type="module" src="./js/app.js"></script>
