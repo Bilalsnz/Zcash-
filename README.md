@@ -29,7 +29,7 @@ node --test tests/readiness.test.js
 ```
 
 The test cases cover:
-1. A Testnet response at the activation height.
+1. A Testnet response above the activation height.
 2. A Mainnet response.
 3. A Testnet response below the activation height.
 4. Malformed JSON.
