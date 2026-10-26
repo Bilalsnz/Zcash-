@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { assessResponse, ACTIVATION_HEIGHT, BRANCH_ID } from "../js/readiness.js";
 
 test("testnet response at activation height reports height signal only", () => {
-  const result = assessResponse(JSON.stringify({ chain: "test", blocks: ACTIVATION_HEIGHT, subversion: "/Zebra:test/" }));
+  const result = assessResponse(JSON.stringify({ chain: "test", blocks: ACTIVATION_HEIGHT + 1, subversion: "/Zebra:test/" }));
   assert.equal(result.badge, "HEIGHT SIGNAL ONLY");
   assert.equal(result.readiness, "Height signal only");
   assert.equal(result.network, "test");
